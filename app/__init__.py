@@ -16,6 +16,7 @@ login.login_view = 'login'
 
 from app import routes, models, errors
 
+# error handling. Emails errors to admin (see config file) and also stores errors in microblog.log file
 if not app.debug:
     if app.config['MAIL_SERVER']:
         auth = None
