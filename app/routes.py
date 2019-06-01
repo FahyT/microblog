@@ -1,8 +1,8 @@
 from flask import render_template, flash, redirect, url_for, request
 from app import app, db
-from app.forms import LoginForm, RegistrationForm, EditProfileForm
+from app.forms import LoginForm, RegistrationForm, EditProfileForm, PostForm
 from flask_login import current_user, login_user, login_required, logout_user
-from app.models import User
+from app.models import User, Post
 from werkzeug.urls import url_parse
 from datetime import datetime
 
@@ -11,6 +11,13 @@ from datetime import datetime
 @app.route("/index")
 @login_required
 def index():
+    form = PostForm()
+    if form.validate_on_submit():
+        post = Post(body=form.post.data, author=current_user)
+        db.session.add(post)
+        db.session.commit()
+        flash('Your post is now live!')
+        return redirect(url_for('index'))
     posts = [
         {
             'author': {'username': 'John'},
@@ -19,13 +26,10 @@ def index():
         {
             'author': {'username': 'Susan'},
             'body': 'The Avengers movie was so cool!'
-        },
-        {
-            'author': {'username': 'James'},
-            'body': 'Fatter than Bob!'
         }
     ]
-    return render_template('index.html', title="Home", posts=posts)
+    return render_template("index.html", title='Home Page', form=form,
+                           posts=posts)
 
 
 @app.route("/login", methods=["GET", "POST"])
