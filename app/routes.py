@@ -18,8 +18,9 @@ def index():
         db.session.commit()
         flash('Your post is now live!')
         return redirect(url_for('index'))
+    page = request.args.get('page', 1, type=int)
     # line 22 should be changes as just shows your own followers. Alternatively remove this functionality?
-    posts = current_user.posts
+    posts = current_user.posts.paginate(page, app.config['POSTS_PER_PAGE'], False)
     return render_template("index.html", title='Home Page', form=form,
                            posts=posts)
 
@@ -105,5 +106,7 @@ def edit_profile():
 @app.route('/explore')
 @login_required
 def explore():
-    posts = Post.query.order_by(Post.timestamp.desc()).all()
+    page = request.args.get('page', 1, type=int)
+    posts = Post.query.order_by(Post.timestamp.desc()).paginate(
+        page, app.config['POSTS_PER_PAGE'], False)
     return render_template('index.html', title='Explore', posts=posts)
