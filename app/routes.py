@@ -8,7 +8,7 @@ from datetime import datetime
 
 
 @app.route("/")
-@app.route("/index")
+@app.route("/index", methods=['GET', 'POST'])
 @login_required
 def index():
     form = PostForm()
@@ -18,16 +18,8 @@ def index():
         db.session.commit()
         flash('Your post is now live!')
         return redirect(url_for('index'))
-    posts = [
-        {
-            'author': {'username': 'John'},
-            'body': 'Beautiful day in Portland!'
-        },
-        {
-            'author': {'username': 'Susan'},
-            'body': 'The Avengers movie was so cool!'
-        }
-    ]
+    # line 22 should be changes as just shows your own followers. Alternatively remove this functionality?
+    posts = current_user.posts
     return render_template("index.html", title='Home Page', form=form,
                            posts=posts)
 
@@ -108,3 +100,10 @@ def edit_profile():
         form.username.data = current_user.username
         form.about_me.data = current_user.about_me
     return render_template('edit_profile.html', title='Edit Profile',form=form)
+
+
+@app.route('/explore')
+@login_required
+def explore():
+    posts = Post.query.order_by(Post.timestamp.desc()).all()
+    return render_template('index.html', title='Explore', posts=posts)
